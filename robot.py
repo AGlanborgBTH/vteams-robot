@@ -1,35 +1,35 @@
+import threading
 import requests
 import random
-import threading
 import time
 
-def update_scooter_location(scooter_id, lat, long):
-  url = "http://localhost:3000/v1/scooters/{}".format(scooter_id)
-  payload = {"location": {"lat": lat, "long": long}}
-  r = requests.patch(url, json=payload)
-  if r.status_code == 200:
-    print("Scooter {} location updated to lat: {}, long: {}".format(scooter_id, lat, long))
-  else:
-    print("Failed to update scooter location: {}".format(r.text))
-
-def update_scooter_locations(scooter_ids):
-  while True:
-    for scooter_id in scooter_ids:
-      lat = random.uniform(-90, 90)
-      long = random.uniform(-180, 180)
-      update_scooter_location(scooter_id, lat, long)
-    time.sleep(1)
-
-# Update three scooters with random lat/long values
-scooter_ids = ["63974faf07b8f76aa2137b0c", "63974faf07b8f76aa2137b0d", "63974faf07b8f76aa2137b0e", ]
-for scooter_id in scooter_ids:
+# Update the lat and long for an object's destination with a given id
+def update_destination(object_id):
+  # Generate a random latitude and longitude
   lat = random.uniform(-90, 90)
   long = random.uniform(-180, 180)
-  update_scooter_location(scooter_id, lat, long)
 
-# Start a thread for each scooter to update its location every second
-threads = []
-for scooter_id in scooter_ids:
-  t = threading.Thread(target=update_scooter_locations, args=([scooter_id],))
-  threads.append(t)
-  t.start()
+  # Print the object id and the new lat and long values
+  print(f'Updating destination for object: {object_id}')
+  print(f'  New Lat = {lat}')
+  print(f'  New Long = {long}')
+
+  # Use a PATCH request to update the lat and long for the object's destination with the given id
+  requests.patch(f'http://localhost:3000/v1/scooters/{object_id}', json={'destination': {'lat': lat, 'long': long}})
+
+# Loop through all objects in the API
+while True:
+  # Use a GET request to retrieve the list of objects
+  response = requests.get('http://localhost:3000/v1/scooters')
+  objects = response.json()
+
+  # Loop through all objects
+  for object in objects['data']:
+    # Check if the object is in use
+    if object['inUse']:
+      # Update the destination for the object
+      thread = threading.Thread(target=update_destination, args=(object['_id'],))
+      thread.start()
+
+  # Sleep for 1 second before checking the objects again
+  time.sleep(1)
