@@ -3,10 +3,9 @@ import requests
 import random
 import time
 
-@profile
 def update_destination(object_id):
 
-  print(f'Updating destination for all Scooters {object_id}')
+  print(f'Updating destination for all inUse Scooters')
 
   requests.patch(f'http://localhost:3000/v1/scooters/{object_id}', json={'destination': {'lat': lat, 'lng': lng}})
 
@@ -36,8 +35,8 @@ while True:
         print("Linköping")
 
       elif object['city'] == str('Uppsala'):
-        lat = random.uniform(17.603621, 17.698512)
-        lng = random.uniform(59.8439, 59.874093)
+        lat = random.uniform(59.8439, 59.874093)
+        lng = random.uniform(17.603621, 17.698512)
         print("Uppsala")
 
       # Update the destination for the object
